@@ -1,11 +1,12 @@
-<div align="center">
+# EduManage - Multi-College Management System
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+This repository contains the source code for the EduManage platform, a comprehensive dashboard for college administrators.
 
-  <h1>Built with AI Studio</h2>
+## Project Structure
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+This project is structured as a monorepo with the following packages:
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
-
-</div>
+-   `/frontend`: The main React frontend application for the dashboard.
+-   `/server`: A placeholder for the future Node.js backend server.
+-   `/shared`: Contains shared code, such as TypeScript types, to be used by both the frontend and backend.
+-   `/docs`: Contains project documentation.

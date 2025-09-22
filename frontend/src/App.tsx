@@ -1,0 +1,94 @@
+
+import React, { useState, useEffect } from 'react';
+import Login from './components/Login';
+import Register from './components/Register';
+import Dashboard from './components/Dashboard';
+import Sidebar from './components/Sidebar';
+import AuthLayout from './components/AuthLayout';
+import CollegeComparison from './components/CollegeComparison';
+import CoursesOffered from './components/CoursesOffered';
+import { User, Role } from '@shared/types';
+import { MOCK_USERS } from './constants';
+
+export type View = 'dashboard' | 'comparison' | 'courses';
+
+const App: React.FC = () => {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isRegistering, setIsRegistering] = useState(false);
+  
+  // Initialize users from localStorage or fall back to MOCK_USERS
+  const [users, setUsers] = useState<User[]>(() => {
+    try {
+      const savedUsers = localStorage.getItem('eduManageUsers');
+      return savedUsers ? JSON.parse(savedUsers) : MOCK_USERS;
+    } catch (error) {
+      console.error("Failed to parse users from localStorage, falling back to default.", error);
+      return MOCK_USERS;
+    }
+  });
+  
+  const [view, setView] = useState<View>('dashboard');
+
+  // Persist users to localStorage whenever the state changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('eduManageUsers', JSON.stringify(users));
+    } catch (error) {
+      console.error("Failed to save users to localStorage.", error);
+    }
+  }, [users]);
+
+  const handleLogin = (user: User) => {
+    setCurrentUser(user);
+    setView('dashboard');
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+  };
+  
+  const handleRegister = (details: any) => {
+    const userExists = users.some(user => user.id.toLowerCase() === details.username.toLowerCase());
+    if (userExists) {
+        alert(`Username "${details.username}" is already taken. Please choose another one.`);
+        return;
+    }
+      
+    const newUser: User = {
+        id: details.username,
+        name: `${details.firstName} ${details.lastName}`,
+        email: details.email,
+        password: details.password,
+        role: details.role,
+        college: details.college,
+    };
+    setUsers([...users, newUser]);
+    alert(`Registration successful for ${newUser.name}! You can now log in.`);
+    setIsRegistering(false);
+  };
+
+  if (!currentUser) {
+    return (
+      <AuthLayout>
+        {isRegistering ? (
+          <Register onRegister={handleRegister} switchToLogin={() => setIsRegistering(false)} />
+        ) : (
+          <Login onLogin={handleLogin} users={users} switchToRegister={() => setIsRegistering(true)} />
+        )}
+      </AuthLayout>
+    );
+  }
+
+  return (
+    <div className="h-screen w-full flex bg-slate-950 text-gray-100">
+      <Sidebar user={currentUser} onLogout={handleLogout} view={view} setView={setView} />
+      <div className="flex-1 flex flex-col">
+        {view === 'dashboard' && <Dashboard user={currentUser} />}
+        {view === 'comparison' && currentUser.role === Role.CHAIRMAN && <CollegeComparison />}
+        {view === 'courses' && <CoursesOffered />}
+      </div>
+    </div>
+  );
+};
+
+export default App;
